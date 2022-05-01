@@ -2,27 +2,22 @@
 declare(strict_types=1);
 
 namespace EconomyRename\DaDevGuy;
+
 use davidglitch04\libEco\libEco;
 use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
-use pocketmine\event\Listener;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 
-class Main extends PluginBase implements Listener
-{
-    public function onEnable(): void 
-    {
-        $this->getServer()->getPluginManager()->registerEvents($this, $this);
-        @mkdir($this->getDataFolder());
+class Main extends PluginBase{
+    public function onEnable(): void {
         $this->saveDefaultConfig();
-        $this->getResource("config.yml");
 
         //Config Version
 
-        if($this->getConfig()->get("config-ver") != 2)
+        if($this->getConfig()->get("config-ver") !== 2)
         {
-            $this->getLogger()->info("§l§cWARNING: §r§cEconomyRename's config is NOT up to date. Please delete the config.yml and restart the server or the plugin may not work properly.");
+            $this->getLogger()->notice("§l§cWARNING: §r§cEconomyRename's config is NOT up to date. Please delete the config.yml and restart the server or the plugin may not work properly.");
         }
     }
 
@@ -33,21 +28,21 @@ class Main extends PluginBase implements Listener
             if (!$sender instanceof Player) 
             {
                 $sender->sendMessage("Please Use This Command In-Game!");
+             return true;
             }
             if (!$sender->hasPermission("economyrename.use")) 
             {
                 $sender->sendMessage($this->getConfig()->get("no-permission"));
+             return true;
             }
             if (!isset($args[0]))
             {
                 $sender->sendMessage($this->getConfig()->get("usage"));
+             return true;
             }
-            
-            if (isset($args[0])) 
-            {
                 $price = $this->getConfig()->get("rename-price");
                 $bal = libEco::myMoney($sender);
-                if($bal = $price){
+                if($bal >= $price){
                     $p = $sender->getName();
                     libEco::reduceMoney($sender, $price);
                     $name = $args[0];
@@ -61,9 +56,8 @@ class Main extends PluginBase implements Listener
                     $message = str_replace("{name}", $name, $this->getConfig()->get("no-money"));
                     $sender->sendMessage($message);
                 }
-                return true;
-            }
+                break;
         }
-        return false;
+        return true;
     }
 }
